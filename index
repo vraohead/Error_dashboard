@@ -36,6 +36,7 @@
           alert("Please select a week number.");
           return;
         }
+
         google.script.run.withSuccessHandler(renderTable).getErrorsForUser(week);
       }
 
@@ -46,6 +47,7 @@
         }
 
         let html = "<table><tr><th>BID</th><th>Error</th><th>Comments</th><th>Corrective Measures</th><th>Accepted?</th><th>Action</th></tr>";
+
         errors.forEach(error => {
           html += `
             <tr>
@@ -60,6 +62,7 @@
               </td>
             </tr>`;
         });
+
         html += "</table>";
         document.getElementById("errorTable").innerHTML = html;
       }
@@ -67,7 +70,7 @@
       function updateStatus(bid, status) {
         google.script.run.withSuccessHandler(() => {
           alert("Status updated.");
-          fetchErrors();
+          fetchErrors(); // Refresh the table
         }).updateErrorStatus(bid, status);
       }
     </script>
