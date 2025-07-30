@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      select, button { padding: 6px 12px; margin-bottom: 16px; }
+      table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+      th { background-color: #f4f4f4; }
+      .action-btn { margin-right: 10px; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <h2>My Weekly Audit Errors</h2>
+
+    <label for="weekSelect">Select Week:</label>
+    <select id="weekSelect">
+      <option value="">-- Choose Week --</option>
+      <option value="30">Week 30</option>
+      <option value="31">Week 31</option>
+      <option value="32">Week 32</option>
+      <option value="33">Week 33</option>
+      <option value="34">Week 34</option>
+      <option value="35">Week 35</option>
+    </select>
+
+    <button onclick="fetchErrors()">Load Errors</button>
+
+    <div id="errorTable"></div>
+
+    <script>
+      function fetchErrors() {
+        const week = document.getElementById("weekSelect").value;
+        if (!week) {
+          alert("Please select a week number.");
+          return;
+        }
+
+        google.script.run.withSuccessHandler(renderTable).getErrorsForUser(week);
+      }
+
+      function renderTable(errors) {
+        if (errors.length === 0) {
+          document.getElementById("errorTable").innerHTML = "<p>No errors found for selected week.</p>";
+          return;
+        }
+
+        let html = "<table><tr><th>BID</th><th>Error</th><th>Comments</th><th>Corrective Measures</th><th>Accepted?</th><th>Action</th></tr>";
+
+        errors.forEach(error => {
+          html += `
+            <tr>
+              <td>${error.bid}</td>
+              <td>${error.error}</td>
+              <td>${error.comments}</td>
+              <td>${error.corrective}</td>
+              <td>${error.accepted || ""}</td>
+              <td>
+                <button class="action-btn" onclick="updateStatus('${error.bid}', 'Accepted')">✅ Accept</button>
+                <button class="action-btn" onclick="updateStatus('${error.bid}', 'Contested')">❌ Contest</button>
+              </td>
+            </tr>`;
+        });
+
+        html += "</table>";
+        document.getElementById("errorTable").innerHTML = html;
+      }
+
+      function updateStatus(bid, status) {
+        google.script.run.withSuccessHandler(() => {
+          alert("Status updated.");
+          fetchErrors(); // Refresh the table
+        }).updateErrorStatus(bid, status);
+      }
+    </script>
+  </body>
+</html>
